@@ -6,5 +6,5 @@ export const favoritesApi = {
     apiClient.get<ApiResponse<FavoriteShop[]>>('/api/user/favorites'),
 
   toggle: (shopGuid: string) =>
-    apiClient.post<ApiResponse<{ isFavorite: boolean }>>(`/api/user/favorites/${shopGuid}`),
+    apiClient.post<ApiResponse<boolean>>(`/api/user/favorites/${shopGuid}`),
 }
