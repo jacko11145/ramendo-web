@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia'
 import { useShopFiltersStore } from '@/stores/shop-filters.store'
 
 const filters = useShopFiltersStore()
-const { city, district, types, sort } = storeToRefs(filters)
+const { city, types, sort } = storeToRefs(filters)
 
 const CITIES = ['台北市', '新北市', '桃園市', '台中市', '台南市', '高雄市', '新竹市', '基隆市']
 const TYPES = ['豚骨', '醬油', '鹽味', '味噌', '沾麵', '冷麵', '台式', '創意']

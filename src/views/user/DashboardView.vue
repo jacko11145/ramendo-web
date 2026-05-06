@@ -52,7 +52,18 @@ const STATUS_CLASS: Record<ShopSubmission['status'], string> = {
         <div class="flex items-center gap-2 mt-2">
           <span class="tag">Lv.{{ level }}</span>
           <span v-if="user?.isVip" class="tag bg-red/20 text-red-light">VIP</span>
-          <span class="text-xs text-site-gray-lighter font-mono">{{ user?.role }}</span>
+          <!-- XP rules tooltip -->
+          <div class="relative group">
+            <button class="w-4 h-4 rounded-full border border-site-gray-lighter text-site-gray-lighter text-[10px] leading-none flex items-center justify-center hover:border-cream hover:text-cream transition-colors">
+              ?
+            </button>
+            <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-52 bg-ink border border-site-gray rounded-lg p-3 text-xs text-cream-dark opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10 space-y-1.5">
+              <p class="font-bebas text-sm text-cream tracking-wider mb-2">如何獲得經驗值</p>
+              <div class="flex justify-between"><span>撰寫評論</span><span class="text-green-300 font-mono">+10 XP</span></div>
+              <div class="flex justify-between"><span>提案審核通過</span><span class="text-green-300 font-mono">+50 XP</span></div>
+              <div class="border-t border-site-gray pt-1.5 mt-1.5 text-site-gray-lighter">每 100 XP 升一等級</div>
+            </div>
+          </div>
         </div>
         <!-- XP Progress Bar -->
         <div class="mt-3">
