@@ -54,6 +54,7 @@ const shopBusinessHours = computed(() => shop.value?.businessHours ?? null)
 const { isOpen, todayHours: _todayHours } = useShopStatus(shopBusinessHours)
 
 const activeTab = ref<'menu' | 'reviews' | 'info'>('menu')
+const lightboxIndex = ref<number | null>(null)
 
 // ─── Review form ─────────────────────────────────────────────────────────────
 const newRating = ref(0)
@@ -266,6 +267,42 @@ function handleSubmitReview() {
 
     <!-- Info Tab -->
     <div v-if="activeTab === 'info'" class="space-y-6">
+      <!-- Gallery -->
+      <div v-if="shop.images?.length">
+        <h3 class="section-title text-2xl mb-3">店家照片</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <div
+            v-for="(url, i) in shop.images"
+            :key="i"
+            class="aspect-square bg-ink rounded-lg overflow-hidden cursor-pointer"
+            @click="lightboxIndex = i"
+          >
+            <img :src="url" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Lightbox -->
+      <Teleport to="body">
+        <div
+          v-if="lightboxIndex !== null"
+          class="fixed inset-0 bg-ink/95 z-50 flex items-center justify-center"
+          @click.self="lightboxIndex = null"
+        >
+          <button class="absolute top-4 right-4 text-cream text-3xl leading-none" @click="lightboxIndex = null">✕</button>
+          <button
+            v-if="lightboxIndex > 0"
+            class="absolute left-4 text-cream text-4xl leading-none px-3"
+            @click="lightboxIndex = lightboxIndex! - 1"
+          >‹</button>
+          <img :src="shop.images[lightboxIndex]" class="max-w-[90vw] max-h-[85vh] object-contain rounded-lg" />
+          <button
+            v-if="lightboxIndex < shop.images.length - 1"
+            class="absolute right-4 text-cream text-4xl leading-none px-3"
+            @click="lightboxIndex = lightboxIndex! + 1"
+          >›</button>
+        </div>
+      </Teleport>
       <!-- News -->
       <div v-if="shop.newsItems.length">
         <h3 class="section-title text-2xl mb-3">最新公告</h3>
