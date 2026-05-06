@@ -8,6 +8,7 @@ import { reviewsApi } from '@/api/reviews'
 import { favoritesApi } from '@/api/favorites'
 import { useAuthStore } from '@/stores/auth.store'
 import { useShopStatus } from '@/composables/useShopStatus'
+import { getTypeClass } from '@/utils/shopTypes'
 import AppSpinner from '@/components/common/AppSpinner.vue'
 import AppPagination from '@/components/common/AppPagination.vue'
 import type { BusinessHours } from '@/types'
@@ -53,6 +54,40 @@ const shopBusinessHours = computed(() => shop.value?.businessHours ?? null)
 const { isOpen, todayHours: _todayHours } = useShopStatus(shopBusinessHours)
 
 const activeTab = ref<'menu' | 'reviews' | 'info'>('menu')
+
+// ─── Review form ─────────────────────────────────────────────────────────────
+const newRating = ref(0)
+const hoverRating = ref(0)
+const newVisitDate = ref('')
+const newComment = ref('')
+const reviewError = ref('')
+
+const { mutate: submitReview, isPending: submittingReview } = useMutation({
+  mutationFn: () => reviewsApi.create({
+    shopGuid: shop.value!.id,
+    rating: newRating.value,
+    visitDate: newVisitDate.value,
+    comment: newComment.value || undefined,
+  }),
+  onSuccess: () => {
+    newRating.value = 0
+    newVisitDate.value = ''
+    newComment.value = ''
+    reviewError.value = ''
+    qc.invalidateQueries({ queryKey: ['shop-reviews', guid] })
+    qc.invalidateQueries({ queryKey: ['shop', guid] })
+  },
+  onError: () => {
+    reviewError.value = '送出失敗，請稍後再試'
+  },
+})
+
+function handleSubmitReview() {
+  if (!newRating.value) { reviewError.value = '請選擇評分'; return }
+  if (!newVisitDate.value) { reviewError.value = '請填寫造訪日期'; return }
+  reviewError.value = ''
+  submitReview()
+}
 </script>
 
 <template>
@@ -148,16 +183,71 @@ const activeTab = ref<'menu' | 'reviews' | 'info'>('menu')
 
     <!-- Reviews Tab -->
     <div v-if="activeTab === 'reviews'">
+      <!-- Write Review Form -->
+      <div v-if="isLoggedIn" class="card p-5 mb-6">
+        <h4 class="font-bebas text-xl tracking-wider text-cream mb-4">發表評論</h4>
+
+        <!-- Star Rating -->
+        <div class="flex gap-1 mb-4">
+          <button
+            v-for="n in 5"
+            :key="n"
+            class="text-2xl leading-none transition-colors"
+            :class="(hoverRating || newRating) >= n ? 'text-amber-400' : 'text-site-gray'"
+            @mouseenter="hoverRating = n"
+            @mouseleave="hoverRating = 0"
+            @click="newRating = n"
+          >★</button>
+          <span v-if="newRating" class="ml-2 text-sm text-site-gray-lighter self-center">{{ newRating }}.0</span>
+        </div>
+
+        <!-- Visit Date -->
+        <div class="mb-3">
+          <label class="block text-xs text-site-gray-lighter mb-1">造訪日期</label>
+          <input
+            v-model="newVisitDate"
+            type="date"
+            class="input-field w-full sm:w-48"
+            :max="new Date().toISOString().slice(0, 10)"
+          />
+        </div>
+
+        <!-- Comment -->
+        <div class="mb-4">
+          <label class="block text-xs text-site-gray-lighter mb-1">評論內容（選填）</label>
+          <textarea
+            v-model="newComment"
+            class="input-field w-full resize-none"
+            rows="3"
+            placeholder="分享你的用餐體驗..."
+          />
+        </div>
+
+        <p v-if="reviewError" class="text-red text-xs mb-3">{{ reviewError }}</p>
+
+        <button
+          class="btn-primary"
+          :disabled="submittingReview"
+          @click="handleSubmitReview"
+        >
+          {{ submittingReview ? '送出中...' : '送出評論' }}
+        </button>
+      </div>
+
+      <!-- Review List -->
       <AppSpinner v-if="loadingReviews" />
       <div v-else-if="reviewData?.items.length" class="space-y-4">
         <div v-for="review in reviewData.items" :key="review.id" class="card p-4">
           <div class="flex items-center gap-3 mb-2">
-            <div class="w-9 h-9 rounded-full bg-red flex items-center justify-center text-sm font-bebas">
-              {{ review.userName.charAt(0) }}
+            <div class="w-9 h-9 rounded-full bg-red flex items-center justify-center text-sm font-bebas shrink-0">
+              {{ (review.userName ?? '?').charAt(0) }}
             </div>
             <div>
-              <p class="text-sm text-cream">{{ review.userName }}</p>
-              <p class="text-xs text-site-gray-lighter">Lv.{{ review.userLevel }} · {{ review.visitDate }}</p>
+              <p class="text-sm text-cream">{{ review.userName ?? '匿名' }}</p>
+              <p class="text-xs text-site-gray-lighter">
+                Lv.{{ review.userLevel }}
+                <span v-if="review.visitDate"> · 造訪 {{ review.visitDate }}</span>
+              </p>
             </div>
             <span class="ml-auto font-mono text-cream">★ {{ review.rating }}</span>
           </div>
@@ -208,6 +298,19 @@ const activeTab = ref<'menu' | 'reviews' | 'info'>('menu')
         <div v-if="shop.phone" class="flex gap-3"><span class="text-site-gray-lighter w-16">電話</span><span>{{ shop.phone }}</span></div>
         <div v-if="shop.website" class="flex gap-3"><span class="text-site-gray-lighter w-16">網站</span><a :href="shop.website" target="_blank" class="text-red hover:underline">{{ shop.website }}</a></div>
         <div v-if="shop.instagram" class="flex gap-3"><span class="text-site-gray-lighter w-16">IG</span><a :href="`https://instagram.com/${shop.instagram}`" target="_blank" class="text-red hover:underline">@{{ shop.instagram }}</a></div>
+
+        <!-- Type tags -->
+        <div v-if="shop.types?.length" class="flex gap-3 pt-1">
+          <span class="text-site-gray-lighter w-16 shrink-0">湯底</span>
+          <div class="flex flex-wrap gap-1">
+            <span
+              v-for="t in shop.types"
+              :key="t"
+              class="text-xs px-1.5 py-0.5 rounded font-mono"
+              :class="getTypeClass(t)"
+            >{{ t }}</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>

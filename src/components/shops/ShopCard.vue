@@ -1,8 +1,31 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
+import { storeToRefs } from 'pinia'
+import { favoritesApi } from '@/api/favorites'
+import { useAuthStore } from '@/stores/auth.store'
+import { getTypeClass } from '@/utils/shopTypes'
 import type { ShopListItem } from '@/types'
 
 defineProps<{ shop: ShopListItem }>()
+
+const { isLoggedIn } = storeToRefs(useAuthStore())
+const qc = useQueryClient()
+
+const { data: favorites } = useQuery({
+  queryKey: ['user-favorites'],
+  queryFn: () => favoritesApi.getList().then((r) => r.data.data),
+  enabled: isLoggedIn,
+})
+
+const isFavorited = (shopId: string) =>
+  computed(() => favorites.value?.some((f) => f.shopGuid === shopId) ?? false)
+
+const { mutate: toggleFavorite, isPending: toggling } = useMutation({
+  mutationFn: (shopId: string) => favoritesApi.toggle(shopId),
+  onSuccess: () => qc.invalidateQueries({ queryKey: ['user-favorites'] }),
+})
 </script>
 
 <template>
@@ -28,20 +51,36 @@ defineProps<{ shop: ShopListItem }>()
       >
         {{ shop.isOpen ? '營業中' : '休息中' }}
       </div>
-      <!-- Verified badge -->
-      <div v-if="shop.isVerified" class="absolute top-2 right-2 text-red text-sm" title="已認證">✦</div>
+      <!-- Favorite heart button -->
+      <button
+        v-if="isLoggedIn"
+        class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full backdrop-blur-sm transition-all text-base leading-none"
+        :class="isFavorited(shop.id).value
+          ? 'bg-red text-white'
+          : 'bg-ink/60 text-cream hover:bg-red/80'"
+        :disabled="toggling"
+        @click.prevent.stop="toggleFavorite(shop.id)"
+      >
+        {{ isFavorited(shop.id).value ? '♥' : '♡' }}
+      </button>
     </div>
 
     <!-- Info -->
     <div class="p-4">
-      <h3 class="font-bebas text-xl tracking-wide text-cream group-hover:text-red transition-colors truncate">
+      <h3 class="font-bebas text-xl tracking-wide text-cream group-hover:text-red transition-colors truncate flex items-center gap-1.5">
         {{ shop.name }}
+        <span v-if="shop.isVerified" class="text-red text-sm shrink-0" title="已認證">✦</span>
       </h3>
       <p class="text-xs text-site-gray-lighter mt-0.5">{{ shop.city }} {{ shop.district }}</p>
 
       <!-- Tags -->
       <div class="flex flex-wrap gap-1 mt-2">
-        <span v-for="t in shop.types.slice(0, 3)" :key="t" class="tag">{{ t }}</span>
+        <span
+          v-for="t in shop.types.slice(0, 3)"
+          :key="t"
+          class="text-xs px-1.5 py-0.5 rounded font-mono"
+          :class="getTypeClass(t)"
+        >{{ t }}</span>
       </div>
 
       <!-- Rating -->

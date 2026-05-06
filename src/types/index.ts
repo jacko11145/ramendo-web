@@ -113,28 +113,16 @@ export interface ShopDetail extends ShopListItem {
 
 // ─── Reviews ────────────────────────────────────────────────────────────────
 
-export interface MenuItemRatingDto {
-  menuItemId: string
-  rating: number
-  comment: string | null
-}
-
-export interface ReviewOption {
-  optionTypeId: number
-  optionValueId: number
-}
-
 export interface Review {
   id: string
   userId: string
-  userName: string
+  userName: string | null
   userImage: string | null
   userLevel: number
   rating: number
-  visitDate: string
+  visitDate: string | null
   comment: string | null
-  menuItemRatings: MenuItemRatingDto[]
-  options: ReviewOption[]
+  shopId: string
   createdAt: string
 }
 
