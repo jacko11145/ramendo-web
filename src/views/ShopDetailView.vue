@@ -309,7 +309,9 @@ function handleSubmitReview() {
         <div v-for="n in shop.newsItems" :key="n.title" class="card p-4">
           <p class="font-bebas text-lg text-cream">{{ n.title }}</p>
           <p class="text-sm text-cream-dark mt-1">{{ n.content }}</p>
-          <p class="text-xs text-site-gray-lighter mt-2">{{ n.startDate }} — {{ n.endDate }}</p>
+          <p class="text-xs text-site-gray-lighter mt-2">
+            {{ n.startDate?.slice(0, 10) }} — {{ n.endDate?.slice(0, 10) }}
+          </p>
         </div>
       </div>
 
@@ -331,7 +333,7 @@ function handleSubmitReview() {
       </div>
 
       <!-- Contact -->
-      <div class="card p-4 space-y-2 text-sm">
+      <div v-if="shop.phone || shop.website || shop.instagram || shop.types?.length" class="card p-4 space-y-2 text-sm">
         <div v-if="shop.phone" class="flex gap-3"><span class="text-site-gray-lighter w-16">電話</span><span>{{ shop.phone }}</span></div>
         <div v-if="shop.website" class="flex gap-3"><span class="text-site-gray-lighter w-16">網站</span><a :href="shop.website" target="_blank" class="text-red hover:underline">{{ shop.website }}</a></div>
         <div v-if="shop.instagram" class="flex gap-3"><span class="text-site-gray-lighter w-16">IG</span><a :href="`https://instagram.com/${shop.instagram}`" target="_blank" class="text-red hover:underline">@{{ shop.instagram }}</a></div>
