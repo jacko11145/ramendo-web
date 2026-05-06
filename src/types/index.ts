@@ -84,7 +84,7 @@ export interface MenuItem {
 }
 
 export interface ShopListItem {
-  guid: string
+  id: string
   name: string
   city: string
   district: string

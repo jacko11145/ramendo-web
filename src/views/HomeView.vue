@@ -24,7 +24,7 @@ const { data: rankData } = useQuery({
     <div class="relative max-w-7xl mx-auto px-4 py-24">
       <p class="font-mono text-red text-sm tracking-widest uppercase mb-4">Taiwan Ramen Guide</p>
       <h1 class="font-bebas text-7xl md:text-9xl tracking-widest text-cream leading-none">
-        拉麵道
+        <span class="bg-red text-white leading-none px-1">拉</span>麵道
       </h1>
       <p class="text-cream-dark mt-4 max-w-md text-lg">
         探索台灣最棒的拉麵體驗 — 從豚骨到醬油，每一碗都是一段故事。
@@ -48,7 +48,7 @@ const { data: rankData } = useQuery({
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <ShopCard
         v-for="shop in shopsData?.items"
-        :key="shop.guid"
+        :key="shop.id"
         :shop="shop"
       />
     </div>

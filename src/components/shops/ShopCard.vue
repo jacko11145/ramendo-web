@@ -7,7 +7,7 @@ defineProps<{ shop: ShopListItem }>()
 
 <template>
   <RouterLink
-    :to="`/ramen-shops/${shop.guid}`"
+    :to="`/ramen-shops/${shop.id}`"
     class="card group block transition-all duration-300 hover:-translate-y-1 hover:border-red/50"
   >
     <!-- Cover image -->

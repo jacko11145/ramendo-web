@@ -24,7 +24,7 @@ async function handleRegister() {
   }
   loading.value = true
   try {
-    await auth.register(email.value, password.value, name.value, invitationCode.value)
+    await auth.register(email.value, password.value, name.value, invitationCode.value || undefined)
     ui.toast.success('註冊成功！歡迎加入拉麵道')
     router.push('/')
   } catch (e: unknown) {
@@ -57,8 +57,8 @@ async function handleRegister() {
         <input v-model="confirm" type="password" class="input-field" placeholder="••••••••" required />
       </div>
       <div>
-        <label class="block text-xs text-site-gray-lighter mb-1">邀請碼</label>
-        <input v-model="invitationCode" class="input-field font-mono uppercase" placeholder="XXXX-XXXX" required />
+        <label class="block text-xs text-site-gray-lighter mb-1">邀請碼 <span class="text-site-gray">(選填)</span></label>
+        <input v-model="invitationCode" class="input-field font-mono uppercase" placeholder="XXXX-XXXX" />
       </div>
 
       <p v-if="error" class="text-red text-xs">{{ error }}</p>

@@ -2,7 +2,7 @@ import { apiClient } from './client'
 import type { ApiResponse, AuthTokens, UserSession } from '@/types'
 
 export const authApi = {
-  register: (data: { email: string; password: string; name: string; invitationCode: string }) =>
+  register: (data: { email: string; password: string; name: string; invitationCode?: string }) =>
     apiClient.post<ApiResponse<AuthTokens>>('/api/auth/register', data),
 
   login: (data: { email: string; password: string }) =>

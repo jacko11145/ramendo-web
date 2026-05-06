@@ -47,7 +47,7 @@ watch(params, () => window.scrollTo({ top: 0, behavior: 'smooth' }))
           <p class="text-sm text-site-gray-lighter mb-4">共 {{ data?.total ?? 0 }} 間店家</p>
 
           <div v-if="data?.items.length" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-10">
-            <ShopCard v-for="shop in data.items" :key="shop.guid" :shop="shop" />
+            <ShopCard v-for="shop in data.items" :key="shop.id" :shop="shop" />
           </div>
 
           <div v-else class="text-center py-20 text-site-gray-lighter">
