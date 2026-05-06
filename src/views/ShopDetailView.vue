@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { useQuery } from '@tanstack/vue-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
+import { storeToRefs } from 'pinia'
 import { shopsApi } from '@/api/shops'
 import { reviewsApi } from '@/api/reviews'
+import { favoritesApi } from '@/api/favorites'
+import { useAuthStore } from '@/stores/auth.store'
 import { useShopStatus } from '@/composables/useShopStatus'
 import AppSpinner from '@/components/common/AppSpinner.vue'
 import AppPagination from '@/components/common/AppPagination.vue'
@@ -12,6 +15,9 @@ import type { BusinessHours } from '@/types'
 const route = useRoute()
 const guid = computed(() => route.params.guid as string)
 const reviewPage = ref(1)
+
+const { isLoggedIn } = storeToRefs(useAuthStore())
+const qc = useQueryClient()
 
 const DAY_LABELS: Record<keyof BusinessHours, string> = {
   monday: '週一', tuesday: '週二', wednesday: '週三',
@@ -28,6 +34,21 @@ const { data: reviewData, isLoading: loadingReviews } = useQuery({
   queryFn: () => reviewsApi.getByShop(guid.value, reviewPage.value).then((r) => r.data.data),
 })
 
+const { data: favorites } = useQuery({
+  queryKey: ['user-favorites'],
+  queryFn: () => favoritesApi.getList().then((r) => r.data.data),
+  enabled: isLoggedIn,
+})
+
+const isFavorited = computed(() =>
+  favorites.value?.some((f) => f.shopGuid === shop.value?.id) ?? false
+)
+
+const { mutate: toggleFavorite, isPending: toggling } = useMutation({
+  mutationFn: () => favoritesApi.toggle(shop.value!.id),
+  onSuccess: () => qc.invalidateQueries({ queryKey: ['user-favorites'] }),
+})
+
 const shopBusinessHours = computed(() => shop.value?.businessHours ?? null)
 const { isOpen, todayHours: _todayHours } = useShopStatus(shopBusinessHours)
 
@@ -42,6 +63,21 @@ const activeTab = ref<'menu' | 'reviews' | 'info'>('menu')
     <div class="relative rounded-xl overflow-hidden mb-8 aspect-[21/9] bg-ink-light">
       <img v-if="shop.coverImage" :src="shop.coverImage" :alt="shop.name" class="w-full h-full object-cover" />
       <div class="absolute inset-0 bg-gradient-to-t from-ink/80 to-transparent" />
+
+      <!-- Favorite button -->
+      <button
+        v-if="isLoggedIn"
+        class="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-body backdrop-blur-sm transition-all"
+        :class="isFavorited
+          ? 'bg-red text-white'
+          : 'bg-ink/60 text-cream hover:bg-red/80 hover:text-white'"
+        :disabled="toggling"
+        @click="toggleFavorite()"
+      >
+        <span class="text-base leading-none">{{ isFavorited ? '♥' : '♡' }}</span>
+        {{ isFavorited ? '已收藏' : '加入收藏' }}
+      </button>
+
       <div class="absolute bottom-6 left-6">
         <div class="flex items-center gap-2 mb-2">
           <span
