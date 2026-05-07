@@ -6,7 +6,8 @@ const filters = useShopFiltersStore()
 const { city, types, sort } = storeToRefs(filters)
 
 const CITIES = ['台北市', '新北市', '桃園市', '台中市', '台南市', '高雄市', '新竹市', '基隆市']
-const TYPES = ['豚骨', '醬油', '鹽味', '味噌', '沾麵', '冷麵', '台式', '創意']
+const SOUP_TYPES = ['豚骨', '醬油', '鹽味', '味噌']
+const SHOP_TYPES = ['沾麵', '冷麵', '台式', '創意']
 const SORT_OPTIONS = [
   { value: 'rating', label: '評分最高' },
   { value: 'reviews', label: '評論最多' },
@@ -45,12 +46,28 @@ const SORT_OPTIONS = [
       </select>
     </div>
 
-    <!-- Types -->
+    <!-- Shop Explore Types -->
+    <div>
+      <p class="text-xs font-mono text-site-gray-lighter uppercase mb-2">店家探索</p>
+      <div class="flex flex-wrap gap-2">
+        <button
+          v-for="t in SHOP_TYPES"
+          :key="t"
+          class="tag cursor-pointer transition-colors"
+          :class="types.includes(t) ? 'bg-red text-white' : 'hover:bg-site-gray'"
+          @click="filters.toggleType(t)"
+        >
+          {{ t }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Soup Types -->
     <div>
       <p class="text-xs font-mono text-site-gray-lighter uppercase mb-2">湯底類型</p>
       <div class="flex flex-wrap gap-2">
         <button
-          v-for="t in TYPES"
+          v-for="t in SOUP_TYPES"
           :key="t"
           class="tag cursor-pointer transition-colors"
           :class="types.includes(t) ? 'bg-red text-white' : 'hover:bg-site-gray'"

@@ -23,7 +23,7 @@ async function handleLogout() {
   <nav class="sticky top-0 z-40 bg-ink/90 backdrop-blur border-b border-site-gray">
     <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
       <!-- Logo -->
-      <RouterLink to="/" class="font-bebas text-3xl tracking-widest text-cream hover:text-red transition-colors">
+      <RouterLink to="/" class="font-bebas text-3xl tracking-widest text-cream cursor-default">
         <span class="bg-red text-white leading-none px-0.5">拉</span>麵道
       </RouterLink>
 

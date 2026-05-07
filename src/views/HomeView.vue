@@ -22,7 +22,6 @@ const { data: rankData } = useQuery({
   <section class="relative min-h-[60vh] flex items-center overflow-hidden">
     <div class="absolute inset-0 bg-gradient-to-b from-red-dark/30 to-ink" />
     <div class="relative max-w-7xl mx-auto px-4 py-24">
-      <p class="font-mono text-red text-sm tracking-widest uppercase mb-4">Taiwan Ramen Guide</p>
       <h1 class="font-bebas text-7xl md:text-9xl tracking-widest text-cream leading-none">
         <span class="bg-red text-white leading-none px-1">拉</span>麵道
       </h1>
