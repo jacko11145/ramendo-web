@@ -11,7 +11,7 @@ import { useShopStatus } from '@/composables/useShopStatus'
 import { getTypeClass } from '@/utils/shopTypes'
 import AppSpinner from '@/components/common/AppSpinner.vue'
 import AppPagination from '@/components/common/AppPagination.vue'
-import type { BusinessHours } from '@/types'
+import type { BusinessHours, MenuItem } from '@/types'
 
 const route = useRoute()
 const guid = computed(() => route.params.guid as string)
@@ -56,6 +56,18 @@ const { isOpen, todayHours: _todayHours } = useShopStatus(shopBusinessHours)
 const activeTab = ref<'menu' | 'reviews' | 'info'>('menu')
 const lightboxIndex = ref<number | null>(null)
 const lightboxImages = ref<string[]>([])
+
+// ─── Menu category grouping ───────────────────────────────────────────────────
+const menuByCategory = computed(() => {
+  if (!shop.value?.menuItems.length) return []
+  const map = new Map<string, MenuItem[]>()
+  for (const item of shop.value.menuItems) {
+    const cat = item.customCategory || item.category || '其他'
+    if (!map.has(cat)) map.set(cat, [])
+    map.get(cat)!.push(item)
+  }
+  return Array.from(map.entries()).map(([category, items]) => ({ category, items }))
+})
 
 // ─── Review form ─────────────────────────────────────────────────────────────
 const newRating = ref(0)
@@ -196,21 +208,38 @@ function openLightbox(images: string[], index: number) {
 
     <!-- Menu Tab -->
     <div v-if="activeTab === 'menu'">
-      <div v-if="shop.menuItems.length" class="space-y-3">
-        <div
-          v-for="item in shop.menuItems"
-          :key="item.id"
-          class="card p-4 flex items-start gap-4"
-        >
-          <div class="flex-1">
-            <div class="flex items-center gap-2">
-              <span class="font-bebas text-lg text-cream">{{ item.name }}</span>
-              <span v-if="item.isHighlight" class="tag bg-red/20 text-red-light">推薦</span>
-              <span v-if="item.isLimited" class="tag">限定</span>
+      <div v-if="menuByCategory.length" class="space-y-8">
+        <div v-for="group in menuByCategory" :key="group.category">
+          <h3 class="font-mono text-xs text-site-gray-lighter uppercase tracking-widest mb-3">{{ group.category }}</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div
+              v-for="item in group.items"
+              :key="item.id"
+              class="card flex gap-3 overflow-hidden"
+            >
+              <!-- Item image -->
+              <div
+                v-if="item.image"
+                class="w-24 shrink-0 cursor-pointer"
+                @click="openLightbox([item.image!], 0)"
+              >
+                <img :src="item.image" class="w-full h-full object-cover" />
+              </div>
+
+              <!-- Info -->
+              <div class="flex-1 p-3 flex flex-col justify-between min-w-0">
+                <div>
+                  <div class="flex items-center gap-1.5 flex-wrap mb-1">
+                    <span class="font-bebas text-lg text-cream leading-tight">{{ item.name }}</span>
+                    <span v-if="item.isHighlight" class="tag bg-red/20 text-red-light">推薦</span>
+                    <span v-if="item.isLimited" class="tag">限定</span>
+                  </div>
+                  <p v-if="item.description" class="text-xs text-site-gray-lighter">{{ item.description }}</p>
+                </div>
+                <span class="font-mono text-cream-dark text-sm mt-2">NT$ {{ item.price }}</span>
+              </div>
             </div>
-            <p v-if="item.description" class="text-xs text-site-gray-lighter mt-1">{{ item.description }}</p>
           </div>
-          <span class="font-mono text-cream-dark text-sm whitespace-nowrap">NT$ {{ item.price }}</span>
         </div>
       </div>
       <p v-else class="text-site-gray-lighter text-center py-10">尚無菜單資料</p>
