@@ -14,7 +14,7 @@ export interface GetShopsParams {
 export const shopsApi = {
   getList: (params: GetShopsParams = {}) =>
     apiClient.get<ApiResponse<PagedResult<ShopListItem>>>('/api/shops', {
-      params: { ...params, types: params.types?.join(',') },
+      params,
     }),
 
   getByGuid: (guid: string) =>
