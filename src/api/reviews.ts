@@ -6,8 +6,7 @@ export interface CreateReviewPayload {
   rating: number
   visitDate: string
   comment?: string
-  menuItemRatings?: Array<{ menuItemId: string; rating: number; comment?: string }>
-  options?: Array<{ optionTypeId: number; optionValueId: number }>
+  images?: string[]
 }
 
 export const reviewsApi = {
@@ -18,6 +17,14 @@ export const reviewsApi = {
 
   create: (data: CreateReviewPayload) =>
     apiClient.post<ApiResponse<Review>>('/api/reviews', data),
+
+  uploadImages: (files: File[]) => {
+    const form = new FormData()
+    files.forEach((f) => form.append('files', f))
+    return apiClient.post<ApiResponse<string[]>>('/api/reviews/images', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
 
   delete: (id: string) =>
     apiClient.delete<ApiResponse<null>>(`/api/reviews/${id}`),

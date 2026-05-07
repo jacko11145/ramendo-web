@@ -55,6 +55,7 @@ const { isOpen, todayHours: _todayHours } = useShopStatus(shopBusinessHours)
 
 const activeTab = ref<'menu' | 'reviews' | 'info'>('menu')
 const lightboxIndex = ref<number | null>(null)
+const lightboxImages = ref<string[]>([])
 
 // ─── Review form ─────────────────────────────────────────────────────────────
 const newRating = ref(0)
@@ -62,19 +63,47 @@ const hoverRating = ref(0)
 const newVisitDate = ref('')
 const newComment = ref('')
 const reviewError = ref('')
+const reviewImages = ref<File[]>([])
+const reviewImagePreviews = ref<string[]>([])
+
+function handleImageSelect(event: Event) {
+  const input = event.target as HTMLInputElement
+  if (!input.files) return
+  const files = Array.from(input.files).slice(0, 5 - reviewImages.value.length)
+  reviewImages.value = [...reviewImages.value, ...files].slice(0, 5)
+  reviewImagePreviews.value = reviewImages.value.map((f) => URL.createObjectURL(f))
+  input.value = ''
+}
+
+function removeReviewImage(index: number) {
+  URL.revokeObjectURL(reviewImagePreviews.value[index])
+  reviewImages.value.splice(index, 1)
+  reviewImagePreviews.value.splice(index, 1)
+}
 
 const { mutate: submitReview, isPending: submittingReview } = useMutation({
-  mutationFn: () => reviewsApi.create({
-    shopGuid: shop.value!.id,
-    rating: newRating.value,
-    visitDate: newVisitDate.value,
-    comment: newComment.value || undefined,
-  }),
+  mutationFn: async () => {
+    let imageUrls: string[] = []
+    if (reviewImages.value.length > 0) {
+      const res = await reviewsApi.uploadImages(reviewImages.value)
+      imageUrls = res.data.data ?? []
+    }
+    return reviewsApi.create({
+      shopGuid: shop.value!.id,
+      rating: newRating.value,
+      visitDate: newVisitDate.value,
+      comment: newComment.value || undefined,
+      images: imageUrls,
+    })
+  },
   onSuccess: () => {
     newRating.value = 0
     newVisitDate.value = ''
     newComment.value = ''
     reviewError.value = ''
+    reviewImagePreviews.value.forEach((url) => URL.revokeObjectURL(url))
+    reviewImages.value = []
+    reviewImagePreviews.value = []
     qc.invalidateQueries({ queryKey: ['shop-reviews', guid] })
     qc.invalidateQueries({ queryKey: ['shop', guid] })
   },
@@ -88,6 +117,11 @@ function handleSubmitReview() {
   if (!newVisitDate.value) { reviewError.value = '請填寫造訪日期'; return }
   reviewError.value = ''
   submitReview()
+}
+
+function openLightbox(images: string[], index: number) {
+  lightboxImages.value = images
+  lightboxIndex.value = index
 }
 </script>
 
@@ -214,7 +248,7 @@ function handleSubmitReview() {
         </div>
 
         <!-- Comment -->
-        <div class="mb-4">
+        <div class="mb-3">
           <label class="block text-xs text-site-gray-lighter mb-1">評論內容（選填）</label>
           <textarea
             v-model="newComment"
@@ -222,6 +256,39 @@ function handleSubmitReview() {
             rows="3"
             placeholder="分享你的用餐體驗..."
           />
+        </div>
+
+        <!-- Image Upload -->
+        <div class="mb-4">
+          <label class="block text-xs text-site-gray-lighter mb-2">上傳照片（最多 5 張，選填）</label>
+          <div class="flex flex-wrap gap-2">
+            <!-- Previews -->
+            <div
+              v-for="(preview, i) in reviewImagePreviews"
+              :key="i"
+              class="relative w-20 h-20 rounded-lg overflow-hidden group"
+            >
+              <img :src="preview" class="w-full h-full object-cover" />
+              <button
+                class="absolute inset-0 bg-ink/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xl"
+                @click="removeReviewImage(i)"
+              >✕</button>
+            </div>
+            <!-- Add button -->
+            <label
+              v-if="reviewImages.length < 5"
+              class="w-20 h-20 rounded-lg border border-dashed border-site-gray flex items-center justify-center cursor-pointer hover:border-cream transition-colors"
+            >
+              <span class="text-2xl text-site-gray-lighter">+</span>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                class="hidden"
+                @change="handleImageSelect"
+              />
+            </label>
+          </div>
         </div>
 
         <p v-if="reviewError" class="text-red text-xs mb-3">{{ reviewError }}</p>
@@ -253,6 +320,17 @@ function handleSubmitReview() {
             <span class="ml-auto font-mono text-cream">★ {{ review.rating }}</span>
           </div>
           <p v-if="review.comment" class="text-sm text-cream-dark">{{ review.comment }}</p>
+          <!-- Review Images -->
+          <div v-if="review.images?.length" class="flex flex-wrap gap-2 mt-3">
+            <div
+              v-for="(img, i) in review.images"
+              :key="i"
+              class="w-20 h-20 rounded-lg overflow-hidden cursor-pointer"
+              @click="openLightbox(review.images, i)"
+            >
+              <img :src="img" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+            </div>
+          </div>
         </div>
         <AppPagination
           v-if="reviewData"
@@ -275,7 +353,7 @@ function handleSubmitReview() {
             v-for="(url, i) in shop.images"
             :key="i"
             class="aspect-square bg-ink rounded-lg overflow-hidden cursor-pointer"
-            @click="lightboxIndex = i"
+            @click="openLightbox(shop.images, i)"
           >
             <img :src="url" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
           </div>
@@ -295,14 +373,15 @@ function handleSubmitReview() {
             class="absolute left-4 text-cream text-4xl leading-none px-3"
             @click="lightboxIndex = lightboxIndex! - 1"
           >‹</button>
-          <img :src="shop.images[lightboxIndex]" class="max-w-[90vw] max-h-[85vh] object-contain rounded-lg" />
+          <img :src="lightboxImages[lightboxIndex]" class="max-w-[90vw] max-h-[85vh] object-contain rounded-lg" />
           <button
-            v-if="lightboxIndex < shop.images.length - 1"
+            v-if="lightboxIndex < lightboxImages.length - 1"
             class="absolute right-4 text-cream text-4xl leading-none px-3"
             @click="lightboxIndex = lightboxIndex! + 1"
           >›</button>
         </div>
       </Teleport>
+
       <!-- News -->
       <div v-if="shop.newsItems.length">
         <h3 class="section-title text-2xl mb-3">最新公告</h3>

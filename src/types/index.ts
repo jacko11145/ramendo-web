@@ -122,6 +122,7 @@ export interface Review {
   rating: number
   visitDate: string | null
   comment: string | null
+  images: string[]
   shopId: string
   createdAt: string
 }
