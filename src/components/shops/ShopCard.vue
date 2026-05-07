@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
+import defaultShopImg from '@/assets/default-shop.jpg'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import { storeToRefs } from 'pinia'
 import { favoritesApi } from '@/api/favorites'
@@ -36,14 +37,10 @@ const { mutate: toggleFavorite, isPending: toggling } = useMutation({
     <!-- Cover image -->
     <div class="relative aspect-[4/3] bg-ink overflow-hidden">
       <img
-        v-if="shop.coverImage"
-        :src="shop.coverImage"
+        :src="shop.coverImage ?? defaultShopImg"
         :alt="shop.name"
         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
       />
-      <div v-else class="w-full h-full flex items-center justify-center text-site-gray-lighter">
-        <span class="font-bebas text-5xl opacity-20">拉麵</span>
-      </div>
       <!-- Open/Closed badge -->
       <div
         class="absolute top-2 left-2 px-2 py-0.5 text-xs font-mono rounded"

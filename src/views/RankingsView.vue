@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/vue-query'
 import { rankingsApi } from '@/api/rankings'
 import type { RankingType } from '@/types'
 import AppSpinner from '@/components/common/AppSpinner.vue'
+import defaultShopImg from '@/assets/default-shop.jpg'
 
 const activeType = ref<RankingType>('combined')
 
@@ -66,10 +67,7 @@ const { data, isLoading } = useQuery({
 
         <!-- Image -->
         <div class="w-12 h-12 rounded bg-ink overflow-hidden shrink-0">
-          <img v-if="item.coverImage" :src="item.coverImage" class="w-full h-full object-cover" />
-          <div v-else class="w-full h-full flex items-center justify-center">
-            <span class="font-bebas text-site-gray-lighter text-xs">拉麵</span>
-          </div>
+          <img :src="item.coverImage ?? defaultShopImg" class="w-full h-full object-cover" />
         </div>
 
         <!-- Name -->
@@ -83,7 +81,9 @@ const { data, isLoading } = useQuery({
         <!-- Score + Reviews -->
         <div class="text-right">
           <p class="font-mono text-cream text-lg">{{ item.score.toFixed(1) }}</p>
-          <p class="text-xs text-site-gray-lighter">{{ item.reviewCount }} 則</p>
+          <p class="text-xs text-site-gray-lighter">
+            {{ activeType === 'google' ? item.googleReviewCount : item.reviewCount }} 則
+          </p>
         </div>
       </RouterLink>
     </div>

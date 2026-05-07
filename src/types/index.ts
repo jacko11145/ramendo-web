@@ -141,6 +141,7 @@ export interface RankingItem {
   coverImage: string | null
   score: number
   reviewCount: number
+  googleReviewCount: number
 }
 
 // ─── Favorites ──────────────────────────────────────────────────────────────

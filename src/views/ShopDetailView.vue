@@ -12,6 +12,7 @@ import { getTypeClass } from '@/utils/shopTypes'
 import AppSpinner from '@/components/common/AppSpinner.vue'
 import AppPagination from '@/components/common/AppPagination.vue'
 import type { BusinessHours, MenuItem } from '@/types'
+import defaultShopImg from '@/assets/default-shop.jpg'
 
 const route = useRoute()
 const guid = computed(() => route.params.guid as string)
@@ -143,7 +144,7 @@ function openLightbox(images: string[], index: number) {
   <div v-else-if="shop" class="max-w-5xl mx-auto px-4 py-8">
     <!-- Hero -->
     <div class="relative rounded-xl overflow-hidden mb-8 aspect-[21/9] bg-ink-light">
-      <img v-if="shop.coverImage" :src="shop.coverImage" :alt="shop.name" class="w-full h-full object-cover" />
+      <img :src="shop.coverImage ?? defaultShopImg" :alt="shop.name" class="w-full h-full object-cover" />
       <div class="absolute inset-0 bg-gradient-to-t from-ink/80 to-transparent" />
 
       <!-- Favorite button -->
