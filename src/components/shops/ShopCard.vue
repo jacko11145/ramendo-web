@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
-import defaultShopImg from '@/assets/default-shop.jpg'
+import defaultShopImg from '@/assets/default-shop.png'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import { storeToRefs } from 'pinia'
 import { favoritesApi } from '@/api/favorites'

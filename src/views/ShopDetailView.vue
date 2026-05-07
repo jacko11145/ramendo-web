@@ -12,7 +12,7 @@ import { getTypeClass } from '@/utils/shopTypes'
 import AppSpinner from '@/components/common/AppSpinner.vue'
 import AppPagination from '@/components/common/AppPagination.vue'
 import type { BusinessHours, MenuItem } from '@/types'
-import defaultShopImg from '@/assets/default-shop.jpg'
+import defaultShopImg from '@/assets/default-shop.png'
 
 const route = useRoute()
 const guid = computed(() => route.params.guid as string)

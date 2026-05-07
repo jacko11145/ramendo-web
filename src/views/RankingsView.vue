@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/vue-query'
 import { rankingsApi } from '@/api/rankings'
 import type { RankingType } from '@/types'
 import AppSpinner from '@/components/common/AppSpinner.vue'
-import defaultShopImg from '@/assets/default-shop.jpg'
+import defaultShopImg from '@/assets/default-shop.png'
 
 const activeType = ref<RankingType>('combined')
 
