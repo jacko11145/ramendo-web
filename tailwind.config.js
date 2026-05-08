@@ -4,11 +4,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: { DEFAULT: '#0C0C0C', light: '#1A1A1A' },
+        ink: { DEFAULT: '#F5F2EC', light: '#FFFFFF' },
         red: { DEFAULT: '#C8201A', dark: '#8B1410', light: '#E63B35' },
-        cream: { DEFAULT: '#F0E9D6', dark: '#DDD3B8' },
+        cream: { DEFAULT: '#1A1A1A', dark: '#6B6B6B' },
         'site-white': '#FAFAF7',
-        'site-gray': { DEFAULT: '#3A3A3A', light: '#6B6B6B', lighter: '#9B9B9B' },
+        'site-gray': { DEFAULT: '#DDD9D0', light: '#C4C0B8', lighter: '#9B9B9B' },
       },
       fontFamily: {
         bebas: ['"Bebas Neue"', 'sans-serif'],

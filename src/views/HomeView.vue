@@ -19,8 +19,8 @@ const { data: rankData } = useQuery({
 
 <template>
   <!-- Hero -->
-  <section class="relative min-h-[60vh] flex items-center overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-b from-red-dark/30 to-ink" />
+  <section class="relative min-h-[60vh] flex items-center overflow-hidden bg-[#EDE7D9]">
+    <div class="absolute inset-0 bg-gradient-to-br from-red/10 to-transparent" />
     <div class="relative max-w-7xl mx-auto px-4 py-24">
       <h1 class="font-bebas text-7xl md:text-9xl tracking-widest text-cream leading-none">
         <span class="bg-red text-white leading-none px-1">拉</span>麵道
@@ -35,50 +35,55 @@ const { data: rankData } = useQuery({
     </div>
   </section>
 
-  <!-- Featured Shops -->
+  <!-- Featured Shops + Rankings (horizontal) -->
   <section class="max-w-7xl mx-auto px-4 py-16">
-    <div class="flex items-end justify-between mb-8">
-      <h2 class="section-title">精選店家</h2>
-      <RouterLink to="/ramen-shops" class="text-sm text-site-gray-lighter hover:text-cream transition-colors">
-        查看全部 →
-      </RouterLink>
-    </div>
-    <AppSpinner v-if="loadingShops" />
-    <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      <ShopCard
-        v-for="shop in shopsData?.items"
-        :key="shop.id"
-        :shop="shop"
-      />
-    </div>
-  </section>
+    <div class="flex flex-col lg:flex-row gap-10 items-start">
 
-  <!-- Top Rankings Preview -->
-  <section v-if="rankData?.length" class="bg-ink-light border-y border-site-gray py-16">
-    <div class="max-w-7xl mx-auto px-4">
-      <div class="flex items-end justify-between mb-8">
-        <h2 class="section-title">本週排行</h2>
-        <RouterLink to="/rankings" class="text-sm text-site-gray-lighter hover:text-cream transition-colors">
-          完整排行 →
-        </RouterLink>
+      <!-- 精選店家 (70%) -->
+      <div class="w-full lg:flex-[7] min-w-0">
+        <div class="flex items-end justify-between mb-8">
+          <h2 class="section-title">精選店家</h2>
+          <RouterLink to="/ramen-shops" class="text-sm text-site-gray-lighter hover:text-cream transition-colors">
+            查看全部 →
+          </RouterLink>
+        </div>
+        <AppSpinner v-if="loadingShops" />
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+          <ShopCard
+            v-for="shop in shopsData?.items"
+            :key="shop.id"
+            :shop="shop"
+          />
+        </div>
       </div>
-      <div class="space-y-3">
-        <RouterLink
-          v-for="item in rankData"
-          :key="item.shopGuid"
-          :to="`/ramen-shops/${item.shopGuid}`"
-          class="flex items-center gap-4 p-4 rounded-lg bg-ink border border-site-gray hover:border-red/50 transition-colors"
-        >
-          <span class="font-bebas text-3xl w-8 text-center" :class="item.rank <= 3 ? 'text-red' : 'text-site-gray-lighter'">
-            {{ item.rank }}
-          </span>
-          <div class="flex-1 min-w-0">
-            <p class="font-bebas text-lg tracking-wide truncate">{{ item.shopName }}</p>
-            <p class="text-xs text-site-gray-lighter">{{ item.city }} {{ item.district }}</p>
-          </div>
-          <span class="font-mono text-cream text-sm">{{ item.score.toFixed(1) }}</span>
-        </RouterLink>
+
+      <!-- 本週排行 (30%) -->
+      <div v-if="rankData?.length" class="w-full lg:flex-[3] min-w-0">
+        <div class="flex items-end justify-between mb-8">
+          <h2 class="section-title">本週排行</h2>
+          <RouterLink to="/rankings" class="text-sm text-site-gray-lighter hover:text-cream transition-colors">
+            完整排行 →
+          </RouterLink>
+        </div>
+        <div class="space-y-3">
+          <RouterLink
+            v-for="item in rankData"
+            :key="item.shopGuid"
+            :to="`/ramen-shops/${item.shopGuid}`"
+            class="flex items-center gap-4 p-4 rounded-lg bg-ink-light border border-site-gray hover:border-red/50 hover:shadow-sm transition-all"
+          >
+            <span class="font-bebas text-3xl w-8 text-center" :class="item.rank <= 3 ? 'text-red' : 'text-site-gray-lighter'">
+              {{ item.rank }}
+            </span>
+            <div class="flex-1 min-w-0">
+              <p class="font-bebas text-lg tracking-wide truncate text-cream">{{ item.shopName }}</p>
+              <p class="text-xs text-site-gray-lighter">{{ item.city }} {{ item.district }}</p>
+            </div>
+            <span class="font-mono text-cream-dark text-sm">{{ item.score.toFixed(1) }}</span>
+          </RouterLink>
+        </div>
       </div>
+
     </div>
   </section>
 
